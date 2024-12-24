@@ -1,0 +1,78 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #0a7941;
+    color: #f7f7f7;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+#turn {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+table#board {
+    border-collapse: collapse;
+    margin: 0 auto;
+    background-color: #4caf50;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    table-layout: fixed;
+    width: 400px;
+    height: 400px; /* Ensures a square board */
+}
+
+td {
+    width: 12.5%; /* 1/8th of the table width */
+    height: 12.5%; /* 1/8th of the table height */
+    border: 1px solid #ffffff;
+    position: relative;
+    background-color: #2ecc71;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+td:hover {
+    background-color: #81c784; /* Light green hover */
+}
+
+td[data-player="B"]::before,
+td[data-player="W"]::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%; /* The size of the circle relative to the cell */
+    height: 70%; /* Ensures the circle is proportional */
+    border-radius: 50%;
+    background-color: transparent;
+}
+
+td[data-player="B"]::before {
+    background-color: black; /* Black pieces */
+}
+
+td[data-player="W"]::before {
+    background-color: white; /* White pieces */
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3); /* Adds depth for white pieces */
+}
+
+.scoreboard {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #dcdcdc;
+}

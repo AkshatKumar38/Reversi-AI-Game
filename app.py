@@ -1,60 +1,82 @@
-from flask import Flask, render_template, jsonify, request
-from game_logic import initialize_board, is_valid_move, apply_move, get_valid_moves
-from ai_logic import astar_move
-import numpy as np
+from flask import Flask, jsonify, request, render_template, redirect, url_for
+from reversi import Reversi
 
 app = Flask(__name__)
+game = Reversi()
+is_ai_game = True  # Global flag to determine game mode
+
 
 @app.route('/')
+def landing_page():
+    return render_template('landing.html')
+
+
+@app.route('/start_game', methods=['POST'])
+def start_game():
+    global is_ai_game
+    game_mode = request.form['game_mode']
+    if game_mode == "friend":
+        is_ai_game = False
+    else:
+        is_ai_game = True
+        game.difficulty = request.form['difficulty']
+    return redirect(url_for('index'))
+
+
+@app.route('/game')
 def index():
     return render_template('index.html')
 
-@app.route('/initialize', methods=['GET'])
-def initialize():
-    board = initialize_board().tolist()
-    return jsonify({'board': board, 'scores': {'player': 2, 'ai': 2}})
+@app.route('/game_state', methods=['GET'])
+def game_state():
+    return jsonify({
+        "board": game.board,
+        "turn": game.current_turn,
+    })
 
-@app.route('/move', methods=['POST'])
+
+
+@app.route('/make_move', methods=['POST'])
 def make_move():
+    global is_ai_game
     data = request.json
-    board = np.array(data['board'])
-    player = data['player']
-    row, col = data['move']
-    difficulty = data['difficulty']
+    row, col = data['row'], data['col']
 
-    if is_valid_move(board, row, col, player):
-        apply_move(board, row, col, player)
-        ai_move = astar_move(board, -player, difficulty)
+    # Player makes a move
+    if not game.make_move(game.current_turn, row, col):
+        return jsonify({"success": False, "message": "Invalid move"})
+
+    print(f"Player ({game.current_turn}) moved: ({row}, {col})")
+    
+    # If AI mode and it's AI's turn, make the AI move automatically
+    if is_ai_game:
+        game.current_turn = 'W'  # Switch turn to AI
+        ai_move = game.best_move('W')  # Get AI's best move
         if ai_move:
-            apply_move(board, ai_move[0], ai_move[1], -player)
-        
-        # Calculate scores
-        player_score = np.sum(board == 1)
-        ai_score = np.sum(board == -1)
+            game.make_move('W', ai_move[0], ai_move[1])  # Execute AI's move
+            print(f"AI moved: {ai_move}")
+            game.current_turn = 'B'  # Switch back to player
+        else:
+            # AI has no valid moves; skip its turn
+            print("AI has no valid moves. Skipping AI's turn.")
+            game.current_turn = 'B'
 
-        # Check for game end
-        valid_moves_player = get_valid_moves(board, player)
-        valid_moves_ai = get_valid_moves(board, -player)
-        game_over = not valid_moves_player and not valid_moves_ai
+    else:
+        # Friend mode: Switch turns between players
+        game.current_turn = 'W' if game.current_turn == 'B' else 'B'
 
-        result = None
-        if game_over:
-            if player_score > ai_score:
-                result = "Player Wins!"
-            elif ai_score > player_score:
-                result = "AI Wins!"
-            else:
-                result = "It's a Draw!"
+    # Check if the next player has valid moves, else skip their turn
+    if not game.valid_moves(game.current_turn):
+        print(f"No valid moves for {game.current_turn}. Skipping turn.")
+        game.current_turn = 'W' if game.current_turn == 'B' else 'B'
 
-        return jsonify({
-            'board': board.tolist(),
-            'ai_move': ai_move,
-            'scores': {'player': player_score, 'ai': ai_score},
-            'game_over': game_over,
-            'result': result
-        })
+    return jsonify({"success": True, "board": game.board, "turn": game.current_turn})
 
-    return jsonify({'error': 'Invalid move'}), 400
+@app.route('/restart_game', methods=['POST'])
+def restart_game():
+    global game
+    game = Reversi()  # Reset the game state
+    return jsonify({"success": True, "message": "Game restarted!"})
 
 if __name__ == '__main__':
     app.run(debug=True)
