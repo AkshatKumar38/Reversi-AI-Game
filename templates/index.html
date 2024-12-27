@@ -2,12 +2,21 @@
 
 {% block content %}
     <h1>Reversi By Akshat</h1>
+    
+    <!-- Scoreboard Section -->
     <div class="scoreboard">
         <span id="black-score" class="score">Black: 2</span>
         <span id="white-score" class="score">White: 2</span>
     </div>
+
     <p id="turn"></p>
+
+    <!-- Game Board -->
     <table id="board" class="table table-bordered"></table>
-    <button class="btn btn-danger mt-3" onclick="restartGame()">Restart Game</button>
-    <button class="btn btn-warning mt-3" onclick="undoMove()">Undo Move</button>
+
+    <!-- Container for buttons -->
+    <div class="d-flex justify-content-center mt-3">
+        <button class="btn btn-danger mx-3" onclick="restartGame()">Restart Game</button>
+        <button class="btn btn-warning mx-4" onclick="undoMove()">Undo Move</button>
+    </div>
 {% endblock %}

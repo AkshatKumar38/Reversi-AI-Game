@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container text-center">
+        <h1>Game Over</h1>
+        {% if winner == 'W' %}
+            <p>White Wins!</p>
+        {% elif winner == 'B' %}
+            <p>Black Wins!</p>
+        {% elif winner == 'D' %}
+            <p>The game is a draw!</p>
+        {% else %}
+            <p>{{ winner }}</p>
+        {% endif %}
+        <p>Black: {{ black_score }} | White: {{ white_score }}</p>
+        <a href="{{ url_for('landing_page') }}" class="btn btn-primary mt-3">Go to Home</a>
+        <a href="{{ url_for('index') }}" class="btn btn-danger mt-3">Play Again</a>
+    </div>
+{% endblock %}

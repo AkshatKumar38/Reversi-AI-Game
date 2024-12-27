@@ -1,6 +1,9 @@
 async function updateBoard() {
     const response = await fetch('/game_state');
     const data = await response.json();
+
+    console.log("Game State:", data);  // Debugging: Log entire game state
+
     const board = document.getElementById('board');
     board.innerHTML = ''; // Clear previous grid
 
@@ -28,9 +31,16 @@ async function updateBoard() {
         board.appendChild(row);
     }
 
+    // Update turn and score
     document.getElementById('turn').textContent = `Turn: ${data.turn}`;
     document.getElementById('black-score').textContent = `Black: ${data.blackScore}`;
     document.getElementById('white-score').textContent = `White: ${data.whiteScore}`;
+
+    // Check if game is over and redirect to the game-over page
+    if (data.gameOver) {
+        console.log("Game Over detected! Winner:", data.winner);  // Log winner
+        window.location.href = `/game_over`;  // Redirect to the game-over page
+    }
 }
 
 async function makeMove(row, col) {
